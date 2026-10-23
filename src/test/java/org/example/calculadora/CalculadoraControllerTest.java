@@ -19,56 +19,56 @@ class CalculadoraControllerTest {
 
     @Test
     void suma() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "5").param("b", "3").param("operacion", "+"))
+        mockMvc.perform(get("/c").param("a", "5").param("b", "3").param("operacion", "+"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultado").value(8.0));
     }
 
     @Test
     void resta() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "5").param("b", "3").param("operacion", "-"))
+        mockMvc.perform(get("/c").param("a", "5").param("b", "3").param("operacion", "-"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultado").value(2.0));
     }
 
     @Test
     void multiplicacion() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "5").param("b", "3").param("operacion", "*"))
+        mockMvc.perform(get("/c").param("a", "5").param("b", "3").param("operacion", "*"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultado").value(15.0));
     }
 
     @Test
     void division() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "7").param("b", "2").param("operacion", "/"))
+        mockMvc.perform(get("/c").param("a", "7").param("b", "2").param("operacion", "/"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultado").value(3.5));
     }
 
     @Test
     void divisionEntreCero() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "7").param("b", "0").param("operacion", "/"))
+        mockMvc.perform(get("/c").param("a", "7").param("b", "0").param("operacion", "/"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("No se puede dividir entre cero"));
     }
 
     @Test
     void operacionNoSoportada() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "7").param("b", "2").param("operacion", "%"))
+        mockMvc.perform(get("/c").param("a", "7").param("b", "2").param("operacion", "%"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
 
     @Test
     void parametroNoNumerico() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "abc").param("b", "2").param("operacion", "+"))
+        mockMvc.perform(get("/c").param("a", "abc").param("b", "2").param("operacion", "+"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("El parámetro 'a' debe ser numérico"));
     }
 
     @Test
     void parametroFaltante() throws Exception {
-        mockMvc.perform(get("/calcular").param("a", "1").param("operacion", "+"))
+        mockMvc.perform(get("/c").param("a", "1").param("operacion", "+"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Falta el parámetro obligatorio 'b'"));
     }
