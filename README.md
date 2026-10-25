@@ -24,14 +24,14 @@ mvn test
 ## Endpoint
 
 ```
-GET /c?a={número}&b={número}&operacion={carácter}
+GET /c?a={número}&b={número}&operacion={nombre}
 ```
 
 | Parámetro   | Tipo   | Descripción                                   |
 |-------------|--------|-----------------------------------------------|
 | `a`         | número | Primer operando (admite decimales, p. ej. `2.5`) |
 | `b`         | número | Segundo operando                              |
-| `operacion` | string | Un solo carácter: `+`, `-`, `*` o `/`          |
+| `operacion` | string | `suma`, `resta`, `multiplicacion` o `division` (no distingue mayúsculas) |
 
 ### Respuesta correcta (`200 OK`)
 
@@ -44,7 +44,7 @@ GET /c?a={número}&b={número}&operacion={carácter}
 | Caso                         | Respuesta                                                      |
 |------------------------------|----------------------------------------------------------------|
 | División entre cero          | `{"error":"No se puede dividir entre cero"}`                   |
-| Operación no soportada       | `{"error":"Operación no soportada: 'x'. Use +, -, * o /"}`     |
+| Operación no soportada       | `{"error":"Operación no soportada: 'x'. Use suma, resta, multiplicacion o division"}`     |
 | `a` o `b` no son numéricos   | `{"error":"El parámetro 'a' debe ser numérico"}`               |
 | Falta un parámetro           | `{"error":"Falta el parámetro obligatorio 'b'"}`               |
 
@@ -53,38 +53,37 @@ GET /c?a={número}&b={número}&operacion={carácter}
 El endpoint tiene CORS abierto a cualquier origen (`Access-Control-Allow-Origin: *`), así que se puede llamar con `fetch` desde una página web alojada en cualquier dominio:
 
 ```javascript
-fetch("http://localhost:8081/c?a=10&b=4&operacion=%2B")
+fetch("http://localhost:8081/c?a=10&b=4&operacion=suma")
   .then(r => r.json())
   .then(data => console.log(data.resultado)); // 14
 ```
 
-> **Nota sobre el `+`:** en una URL, el carácter `+` significa "espacio". Lo correcto es enviarlo codificado como `%2B`, aunque la API también interpreta el espacio como suma, así que `operacion=+` funciona igualmente.
 
 ## Uso con curl
 
 ```bash
 # Suma
-curl "http://localhost:8081/c?a=10&b=4&operacion=%2B"
+curl "http://localhost:8081/c?a=10&b=4&operacion=suma"
 # {"resultado":14.0}
 
 # Resta
-curl "http://localhost:8081/c?a=10&b=4&operacion=-"
+curl "http://localhost:8081/c?a=10&b=4&operacion=resta"
 # {"resultado":6.0}
 
 # Multiplicación
-curl "http://localhost:8081/c?a=10&b=4&operacion=*"
+curl "http://localhost:8081/c?a=10&b=4&operacion=multiplicacion"
 # {"resultado":40.0}
 
 # División
-curl "http://localhost:8081/c?a=10&b=4&operacion=/"
+curl "http://localhost:8081/c?a=10&b=4&operacion=division"
 # {"resultado":2.5}
 
 # Error: división entre cero
-curl "http://localhost:8081/c?a=10&b=0&operacion=/"
+curl "http://localhost:8081/c?a=10&b=0&operacion=division"
 # {"error":"No se puede dividir entre cero"}
 ```
 
-Las comillas alrededor de la URL son importantes: sin ellas, la shell interpreta `&` como "ejecutar en segundo plano" y `*` como un comodín de archivos.
+Las comillas alrededor de la URL son importantes: sin ellas, la shell interpreta `&` como "ejecutar en segundo plano".
 
 Si prefieres que curl codifique los parámetros por ti, usa `-G` con `--data-urlencode`:
 
@@ -92,14 +91,14 @@ Si prefieres que curl codifique los parámetros por ti, usa `-G` con `--data-url
 curl -G "http://localhost:8081/c" \
   --data-urlencode "a=10" \
   --data-urlencode "b=4" \
-  --data-urlencode "operacion=+"
+  --data-urlencode "operacion=suma"
 # {"resultado":14.0}
 ```
 
 Para ver también el código de estado HTTP, añade `-i`:
 
 ```bash
-curl -i "http://localhost:8081/c?a=10&b=0&operacion=/"
+curl -i "http://localhost:8081/c?a=10&b=0&operacion=division"
 ```
 
 ## Uso con Postman
@@ -114,9 +113,9 @@ curl -i "http://localhost:8081/c?a=10&b=0&operacion=/"
    |-------------|-------|
    | `a`         | `10`  |
    | `b`         | `4`   |
-   | `operacion` | `*`   |
+   | `operacion` | `multiplicacion` |
 
-   Postman los añade automáticamente a la URL: `http://localhost:8081/c?a=10&b=4&operacion=*`
+   Postman los añade automáticamente a la URL: `http://localhost:8081/c?a=10&b=4&operacion=multiplicacion`
 6. Pulsa **Send**. En el panel inferior verás el estado `200 OK` y el cuerpo:
 
    ```json
@@ -125,8 +124,8 @@ curl -i "http://localhost:8081/c?a=10&b=0&operacion=/"
    }
    ```
 
-Para probar las demás operaciones basta con cambiar el valor de `operacion` a `+`, `-` o `/`. Para la suma puedes escribir `%2B` o `+` (ambos funcionan).
+Para probar las demás operaciones basta con cambiar el valor de `operacion` a `suma`, `resta` o `division`.
 
-Para probar los errores, prueba por ejemplo `b = 0` con `operacion = /`, o `operacion = x`: Postman mostrará el estado `400 Bad Request` y el mensaje de error en JSON.
+Para probar los errores, prueba por ejemplo `b = 0` con `operacion = division`, o `operacion = x`: Postman mostrará el estado `400 Bad Request` y el mensaje de error en JSON.
 
 **Consejo:** guarda la petición en una colección (**Save → New Collection**) y crea una variable `baseUrl = http://localhost:8081` para no repetir la dirección en cada petición (`{{baseUrl}}/c`).

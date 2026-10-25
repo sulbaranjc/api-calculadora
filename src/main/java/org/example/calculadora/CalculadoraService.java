@@ -6,23 +6,24 @@ import org.springframework.stereotype.Service;
 public class CalculadoraService {
 
     public double calcular(double a, double b, String operacion) {
-        if (operacion == null || operacion.length() != 1) {
-            throw new IllegalArgumentException("La operación debe ser un único carácter: +, -, * o /");
+        if (operacion == null || operacion.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Debe indicar una operación: suma, resta, multiplicacion o division");
         }
 
-        return switch (operacion.charAt(0)) {
-            // En una query string un '+' sin codificar llega como espacio, así que se acepta también.
-            case '+', ' ' -> a + b;
-            case '-' -> a - b;
-            case '*' -> a * b;
-            case '/' -> {
+        // Se ignoran mayúsculas y espacios para que "Suma" o " suma " también funcionen.
+        return switch (operacion.trim().toLowerCase()) {
+            case "suma" -> a + b;
+            case "resta" -> a - b;
+            case "multiplicacion" -> a * b;
+            case "division" -> {
                 if (b == 0) {
                     throw new IllegalArgumentException("No se puede dividir entre cero");
                 }
                 yield a / b;
             }
             default -> throw new IllegalArgumentException(
-                    "Operación no soportada: '" + operacion + "'. Use +, -, * o /");
+                    "Operación no soportada: '" + operacion + "'. Use suma, resta, multiplicacion o division");
         };
     }
 }
